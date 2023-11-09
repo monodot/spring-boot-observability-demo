@@ -3,13 +3,6 @@ logging {
   format = "logfmt"
 }
 
-otelcol.auth.basic "credentials" {
-  // Retrieve credentials using environment variables.
-
-  username = env("BASIC_AUTH_USER")
-  password = env("GRAFANA_CLOUD_API_KEY")
-}
-
 otelcol.receiver.otlp "example" {
   grpc {
     endpoint = "0.0.0.0:4317"
@@ -43,7 +36,7 @@ loki.write "grafana_cloud_logs" {
     url = "https://logs-prod-008.grafana.net/loki/api/v1/push"
 
     basic_auth {
-      username = env("LOKI_USERNAME")
+      username = env("LOGS_USERNAME")
       password = env("GRAFANA_CLOUD_API_KEY")
     }
   }
@@ -72,6 +65,6 @@ otelcol.exporter.otlp "grafana_cloud_traces" {
 }
 
 otelcol.auth.basic "grafana_cloud_traces" {
-  username = env("TEMPO_USERNAME")
+  username = env("TRACES_USERNAME")
   password = env("GRAFANA_CLOUD_API_KEY")
 }

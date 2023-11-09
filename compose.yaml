@@ -32,6 +32,9 @@ services:
     environment:
       AGENT_MODE: flow
       GRAFANA_CLOUD_API_KEY: "${GRAFANA_CLOUD_API_KEY}"
+      LOGS_USERNAME: "${LOGS_USERNAME}"
+      METRICS_USERNAME: "${METRICS_USERNAME}"
+      TRACES_USERNAME: "${TRACES_USERNAME}"
     command:
       - "run"
       - "/etc/agent/config.river"
