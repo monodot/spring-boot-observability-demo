@@ -12,7 +12,7 @@ CREATE TABLE cart_items (
     cart_id INT NOT NULL,
     sku VARCHAR NOT NULL,
     quantity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
+    price DECIMAL(10, 2),
     added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cart_id) REFERENCES carts(id)
 );

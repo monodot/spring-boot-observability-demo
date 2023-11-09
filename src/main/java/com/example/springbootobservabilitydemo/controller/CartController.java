@@ -4,6 +4,8 @@ import com.example.springbootobservabilitydemo.dto.AddToCartResult;
 import com.example.springbootobservabilitydemo.model.Cart;
 import com.example.springbootobservabilitydemo.model.CartItem;
 import com.example.springbootobservabilitydemo.repository.CartRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class CartController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
+
     @Autowired
     private CartRepository cartRepository;
+
+    @PostMapping(path = "/api/carts", produces = "application/json")
+    public ResponseEntity<Cart> createCart() {
+        Cart cart = new Cart();
+        cartRepository.save(cart);
+        return ResponseEntity.ok(cart);
+    }
 
     @GetMapping(path = "/api/carts/{id}", produces = "application/json")
     public ResponseEntity<Cart> getCart(@PathVariable("id") Long id) {
@@ -27,13 +38,14 @@ public class CartController {
     }
 
     // Expects application/x-www-form-urlencoded
-    @PostMapping(path = "/api/carts/{id}/add", consumes = "application/x-www-form-urlencoded",
+    // e.g. sku=123&quantity=2
+    @PostMapping(path = "/api/carts/{id}/items", consumes = "application/x-www-form-urlencoded",
             produces = "application/json",
             params = {"sku", "quantity"})
-    public ResponseEntity<AddToCartResult> addItemToCart(@PathVariable("id") Long id,
+    public ResponseEntity<Cart> addItemToCart(@PathVariable("id") Long id,
                                                          @RequestParam("sku") String sku,
                                                          @RequestParam("quantity") int quantity) {
-        System.out.println("Adding item to cart " + id + " with sku " + sku + " and quantity " + quantity);
+        logger.info("Adding item to cart, cart={} sku={} quantity={}", id, sku, quantity);
 
         Cart cart = cartRepository.findById(id).orElse(null);
 
@@ -41,13 +53,50 @@ public class CartController {
             CartItem item = new CartItem();
             item.setSku(sku);
             item.setQuantity(quantity);
+//            item.setCart(cart);
 
-            cart.getCartItems().add(item);
+            cart.addItem(item);
+//            cart.getItems().add(item);
             cartRepository.save(cart);
 
-            return ResponseEntity.ok(null);
+            logger.info("Cart {}", cart);
+            return ResponseEntity.ok(cart);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @DeleteMapping(path = "/api/carts/{id}/items/{itemId}", produces = "application/json")
+    public ResponseEntity<Cart> deleteItemFromCart(@PathVariable("id") Long id,
+                                                   @PathVariable("itemId") Long itemId) {
+        Cart cart = cartRepository.findById(id).orElse(null);
+
+        if (cart != null) {
+            CartItem item = cart.getItems().stream().filter(i -> i.getId().equals(itemId)).findFirst().orElse(null);
+
+            if (item != null) {
+                cart.getItems().remove(item);
+                cartRepository.save(cart);
+                return ResponseEntity.ok(cart);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping(path = "/api/carts/{id}", produces = "application/json")
+    public ResponseEntity<Cart> deleteCart(@PathVariable("id") Long id) {
+        Cart cart = cartRepository.findById(id).orElse(null);
+
+        if (cart != null) {
+            cartRepository.delete(cart);
+            return ResponseEntity.ok(cart);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }
