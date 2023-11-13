@@ -5,15 +5,15 @@ services:
     restart: always  # Should keep restarting Spring Boot until the DB is up
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.micrometer
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/cart?currentSchema=public
       SPRING_DATASOURCE_USERNAME: supershop
       SPRING_DATASOURCE_PASSWORD: supershop
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://agent:4317
-      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=production,service.namespace=shop,service.version=1.1,service.instance.id=shopping-cart-66b6c48dd5-hprdn
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: shopping-cart
     ports:
-      - "8085:8080"
+      - "8080:8080"
     depends_on:
       - db
 
@@ -39,4 +39,4 @@ services:
       - "run"
       - "/etc/agent/config.river"
     volumes:
-      - ./agent.cloud.river:/etc/agent/config.river:z
+      - ./agent.micrometer.river:/etc/agent/config.river:z
