@@ -53,10 +53,7 @@ public class CartController {
             CartItem item = new CartItem();
             item.setSku(sku);
             item.setQuantity(quantity);
-//            item.setCart(cart);
-
             cart.addItem(item);
-//            cart.getItems().add(item);
             cartRepository.save(cart);
 
             logger.info("Cart {}", cart);
